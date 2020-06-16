@@ -1,6 +1,6 @@
 import matplotlib.pyplot as graph
 
-__version__ = 0.20200616  # Major.YYYYMMDD
+__version__ = 0.20200617  # Major.YYYYMMDD
 
 
 def plot_roc_curve(prediction_probability, true, label='', plot_curve_only=False, show_graph=False):
