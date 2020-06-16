@@ -185,7 +185,7 @@ def plot_confusion_probability_matrix(
     >>> ypp = model.predict_proba(x)[:, 1]
     >>> plot_confusion_probability_matrix(y, model.predict(x), model.predict_proba(x))
     >>> graph.show()
-    >>> plot_confusion_probability_matrix(y, model.predict(x), model.predict_proba(x), labels=['Maligant', 'Benign'])
+    >>> plot_confusion_probability_matrix(y, model.predict(x), model.predict_proba(x), labels=['Malignant', 'Benign'])
     >>> graph.show()
 
     :param y_true:
