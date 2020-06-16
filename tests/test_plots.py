@@ -3,7 +3,7 @@ import matplotlib.pyplot as graph
 from rosey_graph import plot_forest
 
 # If True then execution stops when the plots are drawn
-show_plot_kwargs = {'block': True}
+show_plot_kwargs = {'block': False}
 
 
 def test_plot_forest():

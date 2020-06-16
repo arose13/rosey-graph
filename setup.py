@@ -23,6 +23,7 @@ setup(
     version=__version__,
     description='Making certain routine graphs more quickly',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/arose13/rosey-graph',
     license='BSD',
     classifiers=[
