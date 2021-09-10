@@ -1,6 +1,6 @@
 import matplotlib.pyplot as graph
 
-__version__ = 0.20200617  # Major.YYYYMMDD
+__version__ = 0.20210910  # Major.YYYYMMDD
 
 
 def plot_roc_curve(prediction_probability, true, label='', plot_curve_only=False, show_graph=False):
@@ -23,6 +23,89 @@ def plot_roc_curve(prediction_probability, true, label='', plot_curve_only=False
         graph.show()
 
     return {'fpr': fpr, 'tpr': tpr, 'threshold': thres}
+
+
+def _plot_pr(y_pred_proba, y_true, is_precision_plot: bool, class_labels=None, show_graph=False):
+    from sklearn.metrics import precision_recall_curve
+
+    for class_i in range(y_pred_proba.shape[1]):
+        precision, recall, threshold = precision_recall_curve(
+            y_true=y_true,
+            probas_pred=y_pred_proba[:, class_i]
+        )
+
+        graph.plot(
+            threshold,
+            precision[:-1] if is_precision_plot else recall[:-1],
+            label=f'{class_i}' if class_labels is None else f'{class_labels[class_i]}'
+        )
+        graph.xlabel('Probability Threshold')
+        graph.ylabel('Precision' if is_precision_plot else 'Recall')
+        graph.legend()
+
+        if show_graph:
+            graph.show()
+
+
+def plot_precision(prediction_probability, true, class_labels=None, show_graph=False):
+    """
+    This plots the precision | probability
+
+    Reminder that precision is the ratio ``tp / (tp + fp)`` where ``tp`` is the number of
+    true positives and ``fp`` the number of false positives. The precision is
+    intuitively the ability of the classifier not to label as positive a sample
+    that is negative.
+
+    >>> from sklearn.datasets import load_breast_cancer
+    >>> from sklearn.linear_model import LogisticRegression
+    >>> import matplotlib.pyplot as graph
+    >>> x, y = load_breast_cancer(return_X_y=True)
+    >>> model = LogisticRegression().fit(x, y)
+    >>> ypp = model.predict_proba(x)
+    >>> plot_precision(ypp, y)
+    >>> graph.show()
+    >>> plot_precision(ypp, y, class_labels=['Malignant', 'Benign'])
+    >>> graph.show()
+
+    :return:
+    """
+    _plot_pr(
+        y_pred_proba=prediction_probability,
+        y_true=true,
+        is_precision_plot=True,
+        class_labels=class_labels,
+        show_graph=show_graph
+    )
+
+
+def plot_recall(prediction_probability, true, class_labels=None, show_graph=False):
+    """
+    Plots the recall | probability
+
+    Reminder that recall is the ratio ``tp / (tp + fn)`` where ``tp`` is the number of
+    true positives and ``fn`` the number of false negatives. The recall is
+    intuitively the ability of the classifier to find all the positive samples.
+
+    >>> from sklearn.datasets import load_breast_cancer
+    >>> from sklearn.linear_model import LogisticRegression
+    >>> import matplotlib.pyplot as graph
+    >>> x, y = load_breast_cancer(return_X_y=True)
+    >>> model = LogisticRegression().fit(x, y)
+    >>> ypp = model.predict_proba(x)
+    >>> plot_recall(ypp, y)
+    >>> graph.show()
+    >>> plot_recall(ypp, y, class_labels=['Malignant', 'Benign'])
+    >>> graph.show()
+
+    :return:
+    """
+    _plot_pr(
+        y_pred_proba=prediction_probability,
+        y_true=true,
+        is_precision_plot=False,
+        class_labels=class_labels,
+        show_graph=show_graph
+    )
 
 
 def plot_biplot(pca, x_axis=0, y_axis=1, data=None, feature_names=None, c=None, show_graph=False):
@@ -337,7 +420,8 @@ def plot_forest(point_estimate, lower_bound=None, upper_bound=None, labels=None,
     if show_graph:
         graph.show()
 
-# if __name__ == '__main__':
-#     import doctest
-#
-#     doctest.testmod()
+
+if __name__ == '__main__':
+    import doctest
+
+    doctest.testmod()
