@@ -1,6 +1,15 @@
 import matplotlib.pyplot as graph
 
-__version__ = 0.20210910  # Major.YYYYMMDD
+__version__ = '1.2021.10.01'  # Major.YYYY.MM.DD
+
+
+colors_538 = [
+    '#30a2da',
+    '#fc4f30',
+    '#e5ae38',
+    '#6d904f',
+    '#8b8b8b',
+]
 
 
 def plot_roc_curve(prediction_probability, true, label='', plot_curve_only=False, show_graph=False):
@@ -25,10 +34,19 @@ def plot_roc_curve(prediction_probability, true, label='', plot_curve_only=False
     return {'fpr': fpr, 'tpr': tpr, 'threshold': thres}
 
 
-def _plot_pr(y_pred_proba, y_true, is_precision_plot: bool, class_labels=None, show_graph=False):
+def _plot_pr(
+        y_pred_proba,
+        y_true,
+        is_precision_plot: bool,
+        class_labels,
+        estimate_intervals: bool,
+        show_graph
+):
+    import itertools
     from sklearn.metrics import precision_recall_curve
+    from sklearn.utils import resample
 
-    for class_i in range(y_pred_proba.shape[1]):
+    for class_i, color in zip(range(y_pred_proba.shape[1]), itertools.cycle(colors_538)):
         precision, recall, threshold = precision_recall_curve(
             y_true=y_true,
             probas_pred=y_pred_proba[:, class_i]
@@ -37,8 +55,28 @@ def _plot_pr(y_pred_proba, y_true, is_precision_plot: bool, class_labels=None, s
         graph.plot(
             threshold,
             precision[:-1] if is_precision_plot else recall[:-1],
+            linewidth=2,
+            color=color,
             label=f'{class_i}' if class_labels is None else f'{class_labels[class_i]}'
         )
+
+        if estimate_intervals:
+            for seed in range(1000):
+                y_true_resample, y_pred_proba_resample = resample(y_true, y_pred_proba, random_state=seed)
+
+                precision_i, recall_i, threshold_i = precision_recall_curve(
+                    y_true=y_true_resample,
+                    probas_pred=y_pred_proba_resample[:, class_i]
+                )
+
+                graph.plot(
+                    threshold_i,
+                    precision_i[:-1] if is_precision_plot else recall_i[:-1],
+                    linewidth=0.5,
+                    color=color,
+                    alpha=0.1
+                )
+
         graph.xlabel('Probability Threshold')
         graph.ylabel('Precision' if is_precision_plot else 'Recall')
         graph.legend()
@@ -47,7 +85,7 @@ def _plot_pr(y_pred_proba, y_true, is_precision_plot: bool, class_labels=None, s
             graph.show()
 
 
-def plot_precision(prediction_probability, true, class_labels=None, show_graph=False):
+def plot_precision(prediction_probability, true, class_labels=None, estimate_intervals=False, show_graph=False):
     """
     This plots the precision | probability
 
@@ -66,6 +104,8 @@ def plot_precision(prediction_probability, true, class_labels=None, show_graph=F
     >>> graph.show()
     >>> plot_precision(ypp, y, class_labels=['Malignant', 'Benign'])
     >>> graph.show()
+    >>> plot_precision(ypp, y, estimate_intervals=True, class_labels=['Malignant', 'Benign'])
+    >>> graph.show()
 
     :return:
     """
@@ -74,11 +114,12 @@ def plot_precision(prediction_probability, true, class_labels=None, show_graph=F
         y_true=true,
         is_precision_plot=True,
         class_labels=class_labels,
+        estimate_intervals=estimate_intervals,
         show_graph=show_graph
     )
 
 
-def plot_recall(prediction_probability, true, class_labels=None, show_graph=False):
+def plot_recall(prediction_probability, true, class_labels=None, estimate_intervals=False, show_graph=False):
     """
     Plots the recall | probability
 
@@ -96,6 +137,8 @@ def plot_recall(prediction_probability, true, class_labels=None, show_graph=Fals
     >>> graph.show()
     >>> plot_recall(ypp, y, class_labels=['Malignant', 'Benign'])
     >>> graph.show()
+    >>> plot_recall(ypp, y, estimate_intervals=True, class_labels=['Malignant', 'Benign'])
+    >>> graph.show()
 
     :return:
     """
@@ -104,6 +147,7 @@ def plot_recall(prediction_probability, true, class_labels=None, show_graph=Fals
         y_true=true,
         is_precision_plot=False,
         class_labels=class_labels,
+        estimate_intervals=estimate_intervals,
         show_graph=show_graph
     )
 
