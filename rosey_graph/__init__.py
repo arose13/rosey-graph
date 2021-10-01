@@ -1,7 +1,8 @@
 import matplotlib.pyplot as graph
 
-__version__ = '1.2021.10.01'  # Major.YYYY.MM.DD
+__version__ = '1.2021.10.02'  # Major.YYYY.MM.DD
 
+import numpy as np
 
 colors_538 = [
     '#30a2da',
@@ -12,14 +13,42 @@ colors_538 = [
 ]
 
 
-def plot_roc_curve(prediction_probability, true, label='', plot_curve_only=False, show_graph=False):
+def plot_roc_curve(
+        prediction_probability,
+        true,
+        label='',
+        plot_curve_only=False,
+        estimate_intervals=False,
+        show_graph=False
+):
+    """
+    ROC Curves
+
+    :param prediction_probability:
+    :param true:
+    :param label:
+    :param plot_curve_only:
+    :param estimate_intervals: estimates the 95% interval for the AUC
+    :param show_graph:
+    :return:
+    """
     from sklearn.metrics import roc_curve, roc_auc_score
-    label = label if label == '' else label + ' '
+    from sklearn.utils import resample
 
     fpr, tpr, thres = roc_curve(true, prediction_probability)
     auc = roc_auc_score(true, prediction_probability)
 
-    graph.plot(fpr, tpr, label='{}AUC = {}'.format(label, auc))
+    plot_label = label if label == '' else label + ' '
+    plot_label = f'{plot_label}AUC = {auc:.5f}'
+    if estimate_intervals:
+        auc_dist = []
+        for seed in range(1000):
+            true_resample, prediction_probability_resample = resample(true, prediction_probability)
+            auc_dist.append(roc_auc_score(true_resample, prediction_probability_resample))
+        auc_dist = np.array(auc_dist)
+        plot_label += f' ({np.percentile(auc_dist, 2.5):.5f}, {np.percentile(auc_dist, 97.5):.5f})'
+
+    graph.plot(fpr, tpr, label=plot_label)
     if not plot_curve_only:
         graph.plot([0, 1], [0, 1], linestyle='--', color='k', label='Guessing')
     graph.xlim([0, 1])
