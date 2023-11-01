@@ -1,7 +1,6 @@
+__version__ = '1.2023.11.01'  # Major.YYYY.MM.DD
+
 import matplotlib.pyplot as graph
-
-__version__ = '1.2021.10.02'  # Major.YYYY.MM.DD
-
 import numpy as np
 
 colors_538 = [
@@ -489,6 +488,34 @@ def plot_forest(point_estimate, lower_bound=None, upper_bound=None, labels=None,
         graph.hlines(indices, xmin=lower_bound, xmax=upper_bound, colors='seagreen')
 
     graph.yticks(indices, labels)
+
+    if show_graph:
+        graph.show()
+
+
+def plot_decision_boundary(model, x, dim_indices=(0, 1), extrapolation=1.2, show_graph=False):
+    """
+    Create a 2 dimensional decision boundary plot across any 2 dimensions chosen
+
+    :param model: A model with .predict_proba() method implemented
+    :param x: 
+    :param dim_indices: The indices of the dimensions you want to plot
+    :param extrapolation: The ratio of the x and y axis to extrapolate/extend
+    """
+    if not hasattr(model, 'predict_proba'):
+        raise ValueError('Model must have a `predict_proba()` method implemented')
+
+    x_min, x_max = x[:, dim_indices[0]].min() * extrapolation, x[:, dim_indices[0]].max() * extrapolation
+    y_min, y_max = x[:, dim_indices[1]].min() * extrapolation, x[:, dim_indices[1]].max() * extrapolation
+
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
+
+    pred = model.predict_proba(np.c_[xx.ravel(), yy.ravel()])
+    if len(pred.shape) > 1 and pred.shape[1] > 1:
+        pred = pred[:, 1]
+    pred = pred.reshape(xx.shape)
+
+    graph.contourf(xx, yy, pred, alpha=0.4)
 
     if show_graph:
         graph.show()
