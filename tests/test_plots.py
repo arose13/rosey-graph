@@ -1,10 +1,11 @@
 import matplotlib.pyplot as graph
+from scipy import stats
 import numpy as np
 import pytest
 from hypothesis import given
 from hypothesis import strategies as some
 
-from rosey_graph import plot_ecdf, plot_confusion_probability_matrix, plot_barplot, plot_forest
+from rosey_graph import plot_ecdf, plot_confusion_probability_matrix, plot_barplot, plot_forest, plot_qq
 
 
 # If True then execution stops when the plots are drawn
@@ -26,7 +27,7 @@ def test_confusion_probability_matrix():
     from sklearn.datasets import load_breast_cancer
     from sklearn.linear_model import LogisticRegression
 
-    x, y = load_breast_cancer(True)
+    x, y = load_breast_cancer(return_X_y=True)
     model = LogisticRegression()
     model.fit(x, y)
 
@@ -48,6 +49,24 @@ def test_barplot(orient):
         {'dogs': 10, 'cats': 4, 'birbs': 8},
         orient=orient,
     )
+    show_graph()
+
+
+@pytest.mark.parametrize(
+    'payload',
+    [
+        (stats.norm, stats.norm(100, 15).rvs(1000)),
+        (stats.uniform, stats.uniform(0, 1).rvs(1000)),
+    ]
+)
+def test_plot_qq(payload):
+    dist, data = payload
+
+    plot_qq(data, dist)
+    show_graph()
+
+    data[:10] += 10
+    plot_qq(data, dist)
     show_graph()
 
 

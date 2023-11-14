@@ -12,6 +12,16 @@ colors_538 = [
 ]
 
 
+def _ecdf(data):
+    """
+    Empirical CDF (x, y) generator
+    """
+    import numpy as np
+    x = np.sort(data)
+    cdf = np.linspace(0, 1, len(x))
+    return cdf, x
+
+
 def plot_roc_curve(
         prediction_probability,
         true,
@@ -307,15 +317,6 @@ def plot_ecdf(x, plot_kwargs=None, show_graph=False):
     :return:
     """
 
-    def _ecdf(data):
-        """
-        Empirical CDF (x, y) generator
-        """
-        import numpy as np
-        x = np.sort(data)
-        cdf = np.linspace(0, 1, len(x))
-        return cdf, x
-
     cdf, x = _ecdf(x)
     plot_kwargs = dict() if plot_kwargs is None else plot_kwargs
 
@@ -517,6 +518,29 @@ def plot_decision_boundary(model, x, dim_indices=(0, 1), extrapolation=1.2, show
 
     graph.contourf(xx, yy, pred, alpha=0.4)
 
+    if show_graph:
+        graph.show()
+
+
+def plot_qq(data, dist, show_graph=False):
+    """
+    Create a QQ plot where the x-axis expected values and y-axis are the observed values
+
+    :param data:
+    :param dist: this needs to be a scipy.stats distribution
+    :param show_graph:
+    :return:
+    """
+    # Fit distribution to data
+    params = dist.fit(data)
+    dist = dist(*params)
+
+    # Create a diagonal identity on the _expected_ values
+    expected_cdf, obs_cdf = _ecdf(dist.cdf(data))
+    graph.plot(expected_cdf, obs_cdf, '.', alpha=0.5)
+    graph.xlabel('Expected')
+    graph.ylabel('Observed')
+    
     if show_graph:
         graph.show()
 
