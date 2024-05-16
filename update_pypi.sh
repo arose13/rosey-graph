@@ -4,6 +4,6 @@
 mv dist/*tar.gz old_dist/
 
 python setup.py sdist
-twine upload dist/*
+twine upload --repository pypi dist/*
 
 echo "--- DONE ---"

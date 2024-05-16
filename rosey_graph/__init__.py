@@ -1,4 +1,4 @@
-__version__ = '1.2023.11.14'  # Major.YYYY.MM.DD
+__version__ = '1.2024.05.16'  # Major.YYYY.MM.DD
 
 import matplotlib.pyplot as graph
 import numpy as np
